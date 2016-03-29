@@ -1,48 +1,38 @@
 #!/bin/bash
 WAIT_TIME=20
 PREFIX=unicorn
-#Kill the program if we dont have correct arguemnts
-die () {
-    echo >&2 "$@"
-    exit 1
-}
 
-#tag everythng with unicorn
 #verify that there are 0 projects/networks/vms before starting
-openstack project list | grep $PREFIx
+
+#duplicate projects, subnets are fine (openstack wont allow). 
+#Duplicate networks, routers = not fine. Must ensure everything  is deleted beforehand
 
 
 #number of computes, verify greater than 1
-#choose location this runs on
-source stackrc
+#choose location this runs on, local/deployer/controller?
+#Currently set up for controller
+
+source ~/stackrc
 NUM_COMPUTES=$(nova service-list | grep compute | wc -l)
 
-#for each compute node, create 1 project
-openstack project create c1
+for i in `seq 1 $NUM_COMPUTES`;
+do
+   echo "Creating project $PREFIX_c$i"
+   openstack project create $PREFIX_c$i
 
-#For each project create 2 networks 
-openstack network create c1_1 --project c1
-neutron subnet-create c1_1 123.1.1.0/28 --name c1_1
+   #For each project create 2 networks 
+   echo "Creating network and subnet"
+   openstack network create $PREFIX"_c"$i"_1" --project c1
+   neutron subnet-create $PREFIX"_c"$i"_1" 123.$i".1.0/28" --name $PREFIX"_c"$i"_1"
 
-openstack network create c1_2 --project c1
-neutron subnet-create c1_2 123.1.2.0/28 --name c1_2
+   openstack network create $PREFIX"_c"$i"_2" --project c1
+   neutron subnet-create $PREFIX"_c"$i"_2" 123.$i".2.0/28" --name $PREFIX"_c"$i"_2"
 
-#Route between the networks
-neutron router-create c1 --tenant-id c1 #can try ha mode here if needed
-neutron router-interface-add c1 c1_1
-neutron router-interface-add c1 c1_2
-
-
-
-
-
-openstack network create c2_1 --project c2
-neutron subnet-create c2_1 123.2.1.0/28 --name c2_1
-
-openstack network create c2_2 --project c2
-neutron subnet-create c2_2 123.2.2.0/28 --name c2_2
-
-
+   #Route between the networks
+   neutron router-create $PREFIX"_c"$i --tenant-id $PREFIX"_c"$i
+   neutron router-interface-add $PREFIX"_c"$i $PREFIX"_c"$i"_1"
+   neutron router-interface-add $PREFIX"_c"$i $PREFIX"_c"$i"_2"
+done
 
 
 
@@ -65,5 +55,9 @@ for X in $ROUTER_LIST
 
 
 
-
+#Kill the program if we dont have correct arguemnts
+die () {
+    echo >&2 "$@"
+    exit 1
+}
 
