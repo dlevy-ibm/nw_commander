@@ -14,11 +14,15 @@ PREFIX=unicorn
 source ~/stackrc
 NUM_COMPUTES=$(nova service-list | grep compute | wc -l)
 
-for i in `seq 1 $NUM_COMPUTES`;
+#for i in `seq 1 $NUM_COMPUTES`;
+for i in `seq 1 1`;
 do
    echo Creating project $PREFIX"_c"$i
    openstack project create $PREFIX"_c"$i
-
+#   export OS_TENANT_NAME=$PREFIX"_c"$i  
+ 
+   PROJECT_ID=$(openstack project list | grep $PREFIX"_c"$i | cut -d"|" -f2)
+   openstack role add --user admin  --project $PROJECT_ID  admin
    #For each project create 2 networks 
    echo "Creating network and subnet"
    openstack network create $PREFIX"_c"$i"_1" --project $PREFIX"_c"$i
@@ -28,7 +32,7 @@ do
    neutron subnet-create $PREFIX"_c"$i"_2" 123.$i".2.0/28" --name $PREFIX"_c"$i"_2"
 
    #Route between the networks
-   neutron router-create $PREFIX"_c"$i --tenant-id $PREFIX"_c"$i
+   neutron router-create $PREFIX"_c"$i --tenant-id $PROJECT_ID
    neutron router-interface-add $PREFIX"_c"$i $PREFIX"_c"$i"_1"
    neutron router-interface-add $PREFIX"_c"$i $PREFIX"_c"$i"_2"
 done
