@@ -13,8 +13,8 @@ netperftest() {
     wait $!
     echo "----------------" >> ~/$2
     echo netperf process has completed
-
-
+    
+    
     # collect data after
     echo collect packet data after test... 
     echo "Packet data before" >> ~/$2
@@ -23,7 +23,8 @@ netperftest() {
     echo "----------------" >> ~/$2
 }
 
+netperftest REPLACE_INPUT
 
-netperftest TCP_STREAM netperftcp.txt
-netperftest UDP_STREAM netperfudp.txt "-R 1"
-netperftest TCP_RR netperftcprr.txt
+#netperftest TCP_STREAM netperftcp.txt
+#netperftest UDP_STREAM netperfudp.txt "-R 1"
+#netperftest TCP_RR netperftcprr.txt
