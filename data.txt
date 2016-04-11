@@ -1,5 +1,0 @@
-#cloud-config
-#The user is ibmcloud
-password: Sm4rtcl0ud!
-chpasswd: { expire: False }
-ssh_pwauth: True

@@ -14,15 +14,22 @@ PREFIX=unicorn
 source ~/stackrc
 NUM_COMPUTES=$(nova service-list | grep compute | wc -l)
 
-#for i in `seq 1 $NUM_COMPUTES`;
-for i in `seq 1 1`;
+for i in `seq 1 $NUM_COMPUTES`;
+#for i in `seq 6 100`;
 do
    echo Creating project $PREFIX"_c"$i
    openstack project create $PREFIX"_c"$i
-#   export OS_TENANT_NAME=$PREFIX"_c"$i  
- 
+   
    PROJECT_ID=$(openstack project list | grep $PREFIX"_c"$i | cut -d"|" -f2)
    openstack role add --user admin  --project $PROJECT_ID  admin
+   export OS_TENANT_NAME=$PREFIX"_c"$i  
+   
+   #create security group 
+   nova secgroup-create unlocked open
+   nova secgroup-add-rule unlocked  tcp 1 65535 0.0.0.0/0
+   nova secgroup-add-rule unlocked  udp 1 65535 0.0.0.0/0
+   nova secgroup-add-rule unlocked  icmp -1 -1 0.0.0.0/0
+
    #For each project create 2 networks 
    echo "Creating network and subnet"
    openstack network create $PREFIX"_c"$i"_1" --project $PREFIX"_c"$i
