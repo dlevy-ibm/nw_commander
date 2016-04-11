@@ -4,7 +4,6 @@ netperftest() {
     echo "Collect packet data before test..."
     echo "Packet data before" > ~/$2
     netstat -s | grep -E 'segments retransmited|packet receive errors' >>  ~/$2
-    netstat -s | grep -E 'segments retransmited|packet receive errors' >> ~/$2
     echo "----------------" >> ~/$2
 
     echo beginning netperf test $1    
@@ -19,7 +18,6 @@ netperftest() {
     echo collect packet data after test... 
     echo "Packet data before" >> ~/$2
     netstat -s | grep -E 'segments retransmited|packet receive errors' >>  ~/$2
-    netstat -s | grep -E 'segments retransmited|packet receive errors' >> ~/$2
     echo "----------------" >> ~/$2
 }
 
